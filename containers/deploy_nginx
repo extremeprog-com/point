@@ -1,0 +1,23 @@
+#!/bin/bash
+
+docker_version=`docker -v | grep -oE '[0-9]+\.[0-9]+\.[0-9]+'`
+
+echo $docker_version
+
+docker build -t build-nginx --build-arg DOCKER_VERSION="$docker_version" nginx/ && (
+
+    docker rm -f nginx
+
+    docker run -d --name=nginx \
+               --hostname=`hostname -s` \
+               --cap-add=NET_ADMIN \
+               -p 80:80 -p 443:443 \
+               --restart=always \
+               -v /opt/containers:/opt/containers:ro \
+               -v /var/run:/var/run/host \
+               -v /usr/lib/systemd/system:/usr/lib/systemd/system/host \
+               -v /opt/containers/nginx/etc/letsencrypt:/etc/letsencrypt \
+               -e LANG=C.UTF-8 -e TERM=xterm -e HOSTNAME=nginx \
+               build-nginx
+)
+

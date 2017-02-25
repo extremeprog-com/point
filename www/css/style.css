@@ -1,0 +1,79 @@
+/* Empty. Add your own CSS if you like */
+
+.point-task {
+    pointer-events: auto;
+    position: relative;
+}
+.point-task textarea {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.point-task-frame {
+    z-index: -1;
+    white-space: pre-wrap;
+    top:0;
+    position: relative;
+}
+.item_focused {
+    background-color: rgba(97, 92, 91, 0.13);
+}
+.item_focused * {
+    background: transparent!important;
+}
+.item_focused .point-task-frame {
+    opacity: 0.01;
+}
+.textenter {
+    position: relative;
+    pointer-events: auto;
+}
+.textenter textarea {
+    position: absolute;
+    top:0;
+    width: 100%;
+    height: 100%;
+}
+.textenter-frame {
+    position: relative;
+    min-height: 4em;
+    z-index: -1;
+    white-space: pre-wrap;
+    padding-bottom: 3em;
+    opacity: 0.01;
+}
+.new-task-textarea, .textenter-frame {
+    /*width: 100vw;*/
+    /*height:50vh;*/
+    font-size: 2rem;
+    padding: 0.5rem;
+    line-height: 1.1em;
+}
+.deferred {
+    height: 7em;
+    color: #EEE;
+    text-align: center;
+    font-size: 2rem;
+    padding: 0.5rem;
+    line-height: 1.1em;
+    display: table-cell;
+    vertical-align: middle;
+    width: 100vw;
+}
+.deferred-style,
+.not-active {
+    opacity: 0.5;
+}
+.disabled-play {
+    pointer-events: none;
+}
+#timer {
+    position: absolute;
+    top: 50%;
+    right: 75px;
+    transform: translateY(-50%);
+}
+
+[ng-controller="point"] {
+    margin-top: 30px;
+}

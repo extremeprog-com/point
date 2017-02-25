@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title></title>
+
+    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
+    <link href="css/ionic.app.css" rel="stylesheet">
+    -->
+
+    <!-- ionic/angularjs js -->
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+
+    <!-- cordova script (this will be a 404 during development) -->
+    <script src="cordova.js"></script>
+
+    <!-- your app's js -->
+    <script>classes = {}</script>
+    <script>libs = {}</script>
+    <script>log = []</script>
+
+    <script src="js/lib/Core/Core.js"></script>
+    <script src="js/Timer.js"></script>
+
+    <script src="js/Speaker/Speaker.js"></script>
+    <script src="js/SpeakerFriend/SpeakerFriend.js"></script>
+    <script>SpeakerFriend.prerender = {};</script>
+
+    <script src="js/app.js"></script>
+    <script src="js/point.js"></script>
+  </head>
+  <script>Core.processNamespace(classes);Core.processNamespace(libs);Core.processGlobal();</script>
+  <body ng-app="pointApp">
+
+    <ion-pane>
+      <!--
+      <ion-header-bar class="bar-stable">
+        <h1 class="title">Ionic Blank Starter</h1>
+      </ion-header-bar>
+      -->
+      <ion-content>
+        <div ng-controller="point">
+          <ion-list
+                  show-reorder="true"
+                  can-swipe="true"
+          >
+            <ion-item
+                    ng-repeat="item in vm.list track by $index"
+                    on-swipe-left ="vm.delete_index =  $index"
+                    on-swipe-right="vm.delete_index == $index && (vm.delete_index = -1)"
+                    ng-class="{ item_focused: vm.focus_index == $index }"
+            >
+
+              <div
+                      class="{{ 'point-task' + 
+                      ($index < vm.list.indexOf(textenter) ? '' : ' deferred-style') }}"
+                      ng-class="{ item_focused: vm.focus_index == $index }"
+                      ng-if="item != textenter"
+              ><textarea
+                      id="textarea-{{$index}}"
+                      ng-trim="false"
+                      ng-model="vm.list[$index]"
+                      ng-focus="vm.focus_index = $index; onTextareFocus($index);"
+                      ng-blur="onTextareaBlur($index, item)"
+              ></textarea><div class="point-task-frame">{{ vm.list[$index] }}.</div></div>
+              <ion-reorder-button
+                    id="reorder-{{$index}}"
+                    ng-if="item != textenter"
+                    class="{{
+                      vm.delete_index == $index
+                      ? 'ion-android-delete'
+                      : (
+                        vm.play_index == $index && $index < vm.list.indexOf(textenter)
+                        ? 'ion-play'
+                        : (vm.focus_index == $index && $index < vm.list.indexOf(textenter) ? 'ion-play not-active'
+                        : ($index > vm.list.indexOf(textenter))
+                        ? 'ion-navicon disabled-play'
+                        : 'ion-play not-active' )
+                      )
+                    }}"
+                    ng-class="{playing: vm.play_index == $index}"
+                    on-reorder="onReorder(item, $fromIndex, $toIndex)"
+                    ng-click="controlPlay($index, item)"
+                    onmousedown="console.log(this.className); this.className.match('playing') && setTimeout(function() { document.getElementById('textarea-' + this.id.match(/\d+/)[0]).focus() }.bind(this), 50)"
+              ></ion-reorder-button>
+              <voice text="msg"></voice>
+              <div ng-if="item == textenter">
+                <div class="textenter">
+                  <textarea ng-model="vm.new_task" ng-trim="false" class="new-task-textarea" placeholder="New Task"
+                            ng-blur="vm.new_task && vm.list.splice(vm.list.indexOf(textenter), 0, vm.new_task); vm.new_task = ''"
+                  ></textarea>
+                  <div class="textenter-frame">{{ vm.new_task }}.</div>
+                </div>
+              </div>
+            </ion-item>
+          </ion-list>
+          <div class="deferred" ng-if="vm.list.length - 1 == vm.list.indexOf(textenter) ">
+            deferred zone
+          </div>
+        </div>
+      </ion-content>
+    </ion-pane>
+  </body>
+</html>
