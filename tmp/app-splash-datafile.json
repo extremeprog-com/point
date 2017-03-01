@@ -1,0 +1,9 @@
+[
+    {
+        "input": "../resources/splash-res.svg",
+        "output": [
+              "../resources/ios/splash/Default-736h.png 1242:2208" , "../resources/ios/splash/Default-667h.png 750:1334", "../resources/ios/splash/Default-568h@2x~iphone.png 640:1136"
+            , "../resources/ios/splash/Default@2x~iphone.png 640:960", "../resources/ios/splash/Default@~iphone.png 320:480"
+        ]
+    }
+]

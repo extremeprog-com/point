@@ -27,11 +27,10 @@
         },
         "ionic-plugin-keyboard": {
             "PACKAGE_NAME": "com.ionicframework.point773097"
-        }
-    },
-    "dependent_plugins": {
+        },
         "cordova-plugin-device": {
             "PACKAGE_NAME": "com.ionicframework.point773097"
         }
-    }
+    },
+    "dependent_plugins": {}
 }

@@ -34,7 +34,7 @@
     <script src="js/point.js"></script>
   </head>
   <script>Core.processNamespace(classes);Core.processNamespace(libs);Core.processGlobal();</script>
-  <body ng-app="pointApp" class="platform-android platform-cordova platform-webview">
+  <body ng-app="pointApp">
 
     <ion-pane>
       <!--
@@ -64,8 +64,8 @@
                       id="textarea-{{$index}}"
                       ng-trim="false"
                       ng-model="vm.list[$index]"
-                      ng-focus="vm.focus_index = $index"
-                      ng-blur ="vm.focus_index = -1"
+                      ng-focus="vm.focus_index = $index; onTextareFocus($index);"
+                      ng-blur="onTextareaBlur($index, item)"
               ></textarea><div class="point-task-frame">{{ vm.list[$index] }}.</div></div>
               <ion-reorder-button
                     id="reorder-{{$index}}"
@@ -76,7 +76,7 @@
                       : (
                         vm.play_index == $index && $index < vm.list.indexOf(textenter)
                         ? 'ion-play'
-                        : (vm.focus_index == $index && $index < vm.list.indexOf(textenter) ? 'ion-play'
+                        : (vm.focus_index == $index && $index < vm.list.indexOf(textenter) ? 'ion-play not-active'
                         : ($index > vm.list.indexOf(textenter))
                         ? 'ion-navicon disabled-play'
                         : 'ion-play not-active' )
@@ -91,9 +91,8 @@
               <div ng-if="item == textenter">
                 <div class="textenter">
                   <textarea ng-model="vm.new_task" ng-trim="false" class="new-task-textarea" placeholder="New Task"
-                            ng-blur="onTextareaBlur($index, item)";
+                            ng-blur="vm.new_task && vm.list.splice(vm.list.indexOf(textenter), 0, vm.new_task); vm.new_task = ''"
                   ></textarea>
-                            <!-- ng-blur="vm.new_task && vm.list.splice(vm.list.indexOf(textenter), 0, vm.new_task); vm.new_task = ''" -->
                   <div class="textenter-frame">{{ vm.new_task }}.</div>
                 </div>
               </div>
