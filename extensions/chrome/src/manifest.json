@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Point",
+  "version": "1.0",
+  "icons": {
+    "16": "img/16x16.png",
+    "32": "img/32x32.png",
+    "48": "img/48x48.png",
+    "64": "img/64x64.png",
+    "128": "img/120x120.png"
+  },
+  "browser_action": {
+    "default_title": "Go to the Point!",
+    "default_icon": "img/64x64.png"
+  },
+  "background": {
+    "scripts": ["js/background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["js/index.js"]
+    }
+  ],
+  "permissions": [
+    "tabs"
+  ]
+}
