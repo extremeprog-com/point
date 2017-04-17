@@ -1,8 +1,6 @@
 pointApp.controller('point', function($scope, $interval, $timeout) {
   "use strict";
 
-  window.scope = $scope;
-
   $scope.vm = {};
   var textenter = {textenter: 1};
   $scope.vm.old_list = angular.fromJson(localStorage.vmOldList) || null;
