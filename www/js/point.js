@@ -75,15 +75,12 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
   $scope.startRebasePeriod = function () {
     $timeout.cancel(_to3);
     var now = Date.now();
-    // console.log('Было ', $scope.rebase_period);
     if ($scope.lastActions + $scope.rebase_period > now) {
       $scope.rebase_period = ($scope.lastActions + $scope.rebase_period) - now;
-      // console.log('Осталось ', $scope.rebase_period);
       _to3 = $timeout(function () {
         $scope.vm.old_list = $scope.vm.list.slice(0);
         localStorage.vmList = undefined;
 
-        // console.log('old list: ', $scope.vm.old_list);
         $timeout.cancel(_to3);
 
       }, $scope.rebase_period, true);
@@ -106,7 +103,6 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
   document.body.addEventListener('keypress', $scope.updateLastActDate, true);
   $scope.$watch('msg', function() {
     $scope.updateLastActDate();
-    console.log('msg changed');
   }, true);
 
   // controll play, pause, delete button
@@ -187,7 +183,6 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
 
         if($scope.countdown.mins >= 1) {
 
-          console.log("countdown: " + $scope.countdown.mins);
           $scope.countdown($scope.countdown.mins - 1, parent, 60);
 
         }
@@ -218,7 +213,6 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
 
   // stop task
   $scope.stopPlay = function () {
-    console.log("stop");
     $scope.insomniaOff();
     $timeout.cancel(_to1);
     $timeout.cancel(_to2);
@@ -232,17 +226,11 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
   // play task
   $scope.play = function ($index, item, mins, sec) {
 
-    console.log("mins: " + mins + " " + typeof mins);
-    console.log("sec: " + sec + " " + typeof sec);
-    // console.log("item index", $index);
     if (typeof mins === "number" && typeof sec === "number") {
-      console.log((mins * 60) + sec);
       def_min = (mins * 60) + sec; // seconds
       initPlay($index, mins, sec);
-      console.log("play 1", def_min);
     } else {
       initPlay($index, null, null);
-      console.log("play 2", def_min);
     }
 
     var task = $scope.trimTime($scope.vm.list[$scope.vm.play_index]);
@@ -297,7 +285,6 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
       // time from the task suffix
       def_min = $scope.parseTime(item);
       // text of task without time in suffix
-      console.log(item, $index, def_min);
       var declensionedTime = (def_min / 60 === 1) ? 'одну минуту '
         : $scope.util.plural(def_min / 60, "%d минуту. ", "%d минуты. ", "%d минут. ");
 
@@ -340,8 +327,6 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
 
   $scope.onReorder = function (item, $fromIndex, $toIndex) {
 
-    console.log($fromIndex, $toIndex, $scope.vm.play_index);
-
     $scope.vm.list.splice($fromIndex, 1);
     $scope.vm.list.splice($toIndex, 0, item);
 
@@ -372,19 +357,16 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
       sec = parseInt(time.match(regex)[1]);
 
     var delay = [mins, sec];
-    console.log('delay', delay);
     return delay;
   }
 
   function addMinute(currentTime) {
     var result = parseInt(currentTime) + 1;
-    console.log("+1", result);
     return result;
   }
 
   function subtractsMinute(currentTime) {
     var result = Math.max(0, (parseInt(currentTime) - 1));
-    console.log("-1", result);
     return result;
   }
 
