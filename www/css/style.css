@@ -70,8 +70,34 @@
 #timer {
     position: absolute;
     top: 50%;
-    right: 75px;
+    right: 105px;
     transform: translateY(-50%);
+}
+.plus {
+  font-size: 20px;
+  border: 1px solid #4d4d4d;
+  padding: 0 3px;
+  position: absolute;
+  top: 50%;
+  right: 75px;
+  transform: translateY(-50%);
+  border-radius: 3px;
+  z-index: 9;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.minus {
+  font-size: 20px;
+  border: 1px solid #4d4d4d;
+  padding: 0 6px;
+  position: absolute;
+  top: 50%;
+  right: 145px;
+  transform: translateY(-50%);
+  border-radius: 3px;
+  z-index: 9;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 [ng-controller="point"] {
