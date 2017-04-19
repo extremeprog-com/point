@@ -1,12 +1,12 @@
 (function () {
   "use strict";
 
-  pointApp.factory('countdown', function () {
+  pointApp.factory('countdown', function (vm) {
 
     var Countdown = function () {
-      var that = this,
-          mins = null,
-          sec  = null;
+      var that = this;
+          that.mins = null;
+          that.sec  = null;
 
 
       /**
@@ -30,12 +30,12 @@
         if (minutes < 0) {
           return;
         }
-        if (document.getElementById('timer') && that.vm.play_index !== -1) {
+        if (document.getElementById('timer') && vm.play_index !== -1) {
           that.removeTimer();
         }
 
-        mins = minutes;
-        sec  = seconds || 60;
+        that.mins = minutes;
+        that.sec  = seconds || 60;
 
         var timerEl = document.createElement('div');
         timerEl.setAttribute('id', 'timer');
@@ -47,19 +47,20 @@
       };
 
       function tick() {
+        console.log(that.mins, that.sec);
         var counter         = document.getElementById('timer');
-        var current_minutes = mins;
-        sec -= 1;
+        var current_minutes = that.mins;
+        that.sec -= 1;
         counter.innerText   = current_minutes.toString() + ':' +
-          (sec < 10 ? '0' : '') +
-          String(sec);
-        if (sec > 0) {
+          (that.sec < 10 ? '0' : '') +
+          String(that.sec);
+        if (that.sec > 0) {
           that.timer = setTimeout(tick, 1000);
         } else {
 
-          if (mins >= 1) {
+          if (that.mins >= 1) {
 
-            that.add(mins - 1, 60, parent);
+            that.add(that.mins - 1, 60, parent);
 
           }
         }

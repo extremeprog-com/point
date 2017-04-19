@@ -1,12 +1,8 @@
-pointApp.controller('point', ['$scope', '$interval', '$timeout', 'countdown', 'timeProcessing', function ($scope, $interval, $timeout, countdown, timeProcessing) {
+pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdown', 'timeProcessing', function ($scope, $interval, $timeout, vm, countdown, timeProcessing) {
   "use strict";
 
-  $scope.vm = {};
+  $scope.vm = vm;
   var textenter = {textenter: 1};
-  $scope.vm.old_list = angular.fromJson(localStorage.vmOldList) || null;
-  $scope.vm.focus_index = -1;
-  $scope.vm.play_index = -1;
-  $scope.vm.delete_index = -1;
   $scope.textenter = textenter;
   $scope.lastActions = angular.fromJson(localStorage.lastActions) || null;
   $scope.rebase_period = 2 * 60 * 60 * 1000;
@@ -119,6 +115,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'countdown', 't
       $scope.vm.play_index == $index && $scope.play(-1, item);
     }
   }
+
 
   $scope.util = Core.Class({
     /**
