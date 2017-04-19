@@ -1,11 +1,11 @@
-pointApp.controller('point', function($scope, $interval, $timeout) {
+pointApp.controller('point', function ($scope, $interval, $timeout) {
   "use strict";
 
   $scope.vm = {};
   var textenter = {textenter: 1};
   $scope.vm.old_list = angular.fromJson(localStorage.vmOldList) || null;
-  $scope.vm.focus_index  = -1;
-  $scope.vm.play_index   = -1;
+  $scope.vm.focus_index = -1;
+  $scope.vm.play_index = -1;
   $scope.vm.delete_index = -1;
   $scope.textenter = textenter;
   $scope.lastActions = angular.fromJson(localStorage.lastActions) || null;
@@ -16,9 +16,10 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
   $scope.countdown.mins = null;
   $scope.countdown.seconds = null;
 
-  var def_min = 2 * 60,
-      sec_before_end = 30,
-      repeat_int = 2 * 60; // repeat next message interval in sec
+  var time_scale = 60,
+    task_sec = 2 * time_scale,
+    sec_before_end = time_scale / 2,
+    repeat_int = 2 * time_scale; // repeat next message interval in sec
 
 
   // cordova plugins
@@ -30,7 +31,7 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
     } catch (e) {
       console.error(e.message + ". --> No cordova plugin");
     }
-  }
+  };
 
   $scope.insomniaOff = function () {
     try {
@@ -38,7 +39,7 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
     } catch (e) {
       console.error(e.message + ". --> No cordova plugin");
     }
-  }
+  };
 
   // timeouts id
   var _to1 = null;
@@ -51,19 +52,19 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
     localStorage.vmList = angular.toJson($scope.vm.list);
   } else {
     $scope.vm.list = angular.fromJson(localStorage.vmList);
-    textenter =  $scope.vm.list.filter(function (x) {
+    textenter = $scope.vm.list.filter(function (x) {
       return x.textenter == 1;
     })[0];
     $scope.textenter = textenter;
   }
 
   // write tasks to localStorage
-  $scope.$watchCollection('vm.list', function() {
+  $scope.$watchCollection('vm.list', function () {
     localStorage.vmList = angular.toJson($scope.vm.list);
   }, true);
 
   // write old tasks to localStorage
-  $scope.$watchCollection('vm.old_list', function() {
+  $scope.$watchCollection('vm.old_list', function () {
     localStorage.vmOldList = angular.toJson($scope.vm.old_list);
   }, true);
 
@@ -99,7 +100,7 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
   document.body.addEventListener('click', $scope.updateLastActDate, true);
   document.body.addEventListener('drag', $scope.updateLastActDate, true);
   document.body.addEventListener('keypress', $scope.updateLastActDate, true);
-  $scope.$watch('msg', function() {
+  $scope.$watch('msg', function () {
     $scope.updateLastActDate();
   }, true);
 
@@ -124,6 +125,7 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
   }
 
   // parse time from task text
+  // TODO: to remove
   $scope.parseTime = function (str) {
     var time = str.match(timeReg);
 
@@ -137,6 +139,7 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
   };
 
   // trim time from task text
+  // TODO: to remove
   $scope.trimTime = function (str) {
     return str.replace(timeReg, '');
   }
@@ -175,11 +178,11 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
       counter.innerText = current_minutes.toString() + ':' +
         ($scope.countdown.seconds < 10 ? '0' : '') +
         String($scope.countdown.seconds);
-      if($scope.countdown.seconds > 0) {
+      if ($scope.countdown.seconds > 0) {
         $scope.timer = setTimeout(tick, 1000);
       } else {
 
-        if($scope.countdown.mins >= 1) {
+        if ($scope.countdown.mins >= 1) {
 
           $scope.countdown($scope.countdown.mins - 1, parent, 60);
 
@@ -203,9 +206,11 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
      * @returns {String}
      */
     plural: function (num, one, two, many) {
-      return (function (num) { return (num == 1 && one)
-        || (num && num < 5 && parseInt(num) == num && two) || many })
-        (parseFloat(num) % 10 + (parseInt(num / 10) % 10 == 1 ? 1 : 0) * 10).replace(/%d/g, num);
+      return (function (num) {
+        return (num == 1 && one)
+          || (num && num < 5 && parseInt(num) == num && two) || many
+      })
+      (parseFloat(num) % 10 + (parseInt(num / 10) % 10 == 1 ? 1 : 0) * 10).replace(/%d/g, num);
     }
   });
 
@@ -225,7 +230,7 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
   $scope.play = function ($index, item, mins, sec) {
 
     if (typeof mins === "number" && typeof sec === "number") {
-      def_min = (mins * 60) + sec; // seconds
+      task_sec = (mins * 60) + sec; // seconds
       initPlay($index, mins, sec);
     } else {
       initPlay($index, null, null);
@@ -237,8 +242,8 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
 
     setNoticeBeforeEndTimeout(task);
 
-    var left_time = def_min / 60;
-    if (def_min / 60 >= 3 && left_time > 2) {
+    var left_time = task_sec / 60;
+    if (task_sec / 60 >= 3 && left_time > 2) {
       setLeftTimeout(task, left_time);
     }
 
@@ -249,14 +254,14 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
   };
 
   function initPlay($index, mins, sec) {
-    if(mins && sec) def_min = (mins * 60) + sec; // seconds
+    if (mins && sec) task_sec = (mins * 60) + sec; // seconds
     $scope.insomniaOn();
     $timeout.cancel(_to1);
     $timeout.cancel(_to2);
 
     $scope.vm.play_index = $scope.vm.list.indexOf(textenter) > $index ? $index : -1;
 
-    if($scope.vm.play_index == -1) {
+    if ($scope.vm.play_index == -1) {
       return;
     }
 
@@ -269,25 +274,25 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
     _to2 = $timeout(function () {
       var idx = $scope.vm.list.indexOf(textenter) <= ++$scope.vm.play_index ? 0 : $scope.vm.play_index;
       $scope.play(idx, $scope.vm.list[idx], null, null);
-    }, def_min * 1000, true);
+    }, task_sec * 1000, true);
   }
 
   function setNoticeBeforeEndTimeout(task) {
     _to1 = $timeout(function () {
       $scope.msg = sec_before_end + ' секунд до конца задачи. ' + task;
-    }, (def_min - sec_before_end) * 1000, true);
+    }, (task_sec - sec_before_end) * 1000, true);
   }
 
   function setTask(task, $index, item, mins, sec) {
     if (item) {
       // time from the task suffix
-      def_min = $scope.parseTime(item);
+      task_sec = $scope.parseTime(item);
       // text of task without time in suffix
-      var declensionedTime = (def_min / 60 === 1) ? 'одну минуту '
-        : $scope.util.plural(def_min / 60, "%d минуту. ", "%d минуты. ", "%d минут. ");
+      var declensionedTime = (task_sec / 60 === 1) ? 'одну минуту '
+        : $scope.util.plural(task_sec / 60, "%d минуту. ", "%d минуты. ", "%d минут. ");
 
       // set countdown timer
-      $scope.countdown(def_min / 60, $scope.getParent($scope.vm.play_index), 0);
+      $scope.countdown(task_sec / 60, $scope.getParent($scope.vm.play_index), 0);
 
       $scope.msg = 'Задача на ' + declensionedTime + task;
     } else {
@@ -328,20 +333,20 @@ pointApp.controller('point', function($scope, $interval, $timeout) {
     $scope.vm.list.splice($fromIndex, 1);
     $scope.vm.list.splice($toIndex, 0, item);
 
-    if($fromIndex == $scope.vm.play_index) {
+    if ($fromIndex == $scope.vm.play_index) {
 
       $scope.vm.play_index = $toIndex;
 
       // $scope.removeTimer();
       $scope.countdown($scope.countdown.mins, $scope.getParent($scope.vm.play_index), $scope.countdown.seconds);
 
-      if($scope.vm.play_index > $scope.vm.list.indexOf(textenter)) {
+      if ($scope.vm.play_index > $scope.vm.list.indexOf(textenter)) {
         var idx = $fromIndex >= $scope.vm.list.indexOf(textenter) ? 0 : $fromIndex;
         $scope.play(idx, $scope.vm.list[idx], null, null);
       }
-    } else if($scope.vm.play_index < $fromIndex && $scope.vm.play_index >= $toIndex) {
+    } else if ($scope.vm.play_index < $fromIndex && $scope.vm.play_index >= $toIndex) {
       $scope.vm.play_index++;
-    } else if($scope.vm.play_index > $fromIndex && $scope.vm.play_index < $toIndex) {
+    } else if ($scope.vm.play_index > $fromIndex && $scope.vm.play_index < $toIndex) {
       $scope.vm.play_index--;
     }
 
