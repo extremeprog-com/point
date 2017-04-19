@@ -12,9 +12,9 @@ pointApp.controller('point', function ($scope, $interval, $timeout) {
   $scope.rebase_period = 2 * 60 * 60 * 1000;
   var timeReg = /\d{1,2}\s{0,1}(мин|м|min|mins|m)$/i;
 
-  $scope.countdown = {};
-  $scope.countdown.mins = null;
-  $scope.countdown.seconds = null;
+  // $scope.countdown = {};
+  // $scope.countdown.mins = null;
+  // $scope.countdown.seconds = null;
 
   var time_scale = 60,
     task_sec = 2 * time_scale,
@@ -155,44 +155,44 @@ pointApp.controller('point', function ($scope, $interval, $timeout) {
   }
 
   // countdown timer
-  $scope.countdown = function (minutes, parent, seconds) {
-    if (seconds === 0) {
-      return $scope.countdown(minutes - 1, parent, 60);
-    }
-    if (minutes < 0) {
-      return;
-    }
-    if (document.getElementById('timer') && $scope.vm.play_index !== -1) {
-      $scope.removeTimer();
-    }
-    $scope.countdown.mins = minutes;
-    $scope.countdown.seconds = seconds || 60;
-    var timerEl = document.createElement('div');
-    timerEl.setAttribute('id', 'timer');
-    parent.appendChild(timerEl);
-
-    function tick() {
-      var counter = document.getElementById('timer');
-      var current_minutes = $scope.countdown.mins;
-      $scope.countdown.seconds--;
-      counter.innerText = current_minutes.toString() + ':' +
-        ($scope.countdown.seconds < 10 ? '0' : '') +
-        String($scope.countdown.seconds);
-      if ($scope.countdown.seconds > 0) {
-        $scope.timer = setTimeout(tick, 1000);
-      } else {
-
-        if ($scope.countdown.mins >= 1) {
-
-          $scope.countdown($scope.countdown.mins - 1, parent, 60);
-
-        }
-
-      }
-    }
-
-    tick();
-  }
+  // $scope.countdown = function (minutes, parent, seconds) {
+  //   if (seconds === 0) {
+  //     return $scope.countdown(minutes - 1, parent, 60);
+  //   }
+  //   if (minutes < 0) {
+  //     return;
+  //   }
+  //   if (document.getElementById('timer') && $scope.vm.play_index !== -1) {
+  //     $scope.removeTimer();
+  //   }
+  //   $scope.countdown.mins = minutes;
+  //   $scope.countdown.seconds = seconds || 60;
+  //   var timerEl = document.createElement('div');
+  //   timerEl.setAttribute('id', 'timer');
+  //   parent.appendChild(timerEl);
+  //
+  //   function tick() {
+  //     var counter = document.getElementById('timer');
+  //     var current_minutes = $scope.countdown.mins;
+  //     $scope.countdown.seconds--;
+  //     counter.innerText = current_minutes.toString() + ':' +
+  //       ($scope.countdown.seconds < 10 ? '0' : '') +
+  //       String($scope.countdown.seconds);
+  //     if ($scope.countdown.seconds > 0) {
+  //       $scope.timer = setTimeout(tick, 1000);
+  //     } else {
+  //
+  //       if ($scope.countdown.mins >= 1) {
+  //
+  //         $scope.countdown($scope.countdown.mins - 1, parent, 60);
+  //
+  //       }
+  //
+  //     }
+  //   }
+  //
+  //   tick();
+  // }
 
   $scope.util = Core.Class({
     /**
