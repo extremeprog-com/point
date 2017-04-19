@@ -1,7 +1,5 @@
-pointApp.controller('point', ['$scope', '$interval', '$timeout', 'countdown', function ($scope, $interval, $timeout, countdown) {
+pointApp.controller('point', ['$scope', '$interval', '$timeout', 'countdown', 'timeProcessing', function ($scope, $interval, $timeout, countdown, timeProcessing) {
   "use strict";
-
-  window.cd = countdown;
 
   $scope.vm = {};
   var textenter = {textenter: 1};
@@ -122,26 +120,6 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'countdown', fu
     }
   }
 
-  // parse time from task text
-  // TODO: to remove
-  $scope.parseTime = function (str) {
-    var time = str.match(timeReg);
-
-    if (time !== null) {
-      time = time[0];
-      var timeNum = parseInt(time, 10);
-      return timeNum * 60;
-    } else {
-      return 2 * 60;
-    }
-  };
-
-  // trim time from task text
-  // TODO: to remove
-  $scope.trimTime = function (str) {
-    return str.replace(timeReg, '');
-  }
-
   $scope.util = Core.Class({
     /**
      * Returns plural suffix of unit
@@ -184,7 +162,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'countdown', fu
       initPlay($index, null, null);
     }
 
-    var task = $scope.trimTime($scope.vm.list[$scope.vm.play_index]);
+    var task = timeProcessing.trimTime($scope.vm.list[$scope.vm.play_index]);
 
     setTask(task, $index, item, mins, sec);
 
@@ -234,7 +212,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'countdown', fu
   function setTask(task, $index, item, mins, sec) {
     if (item) {
       // time from the task suffix
-      task_sec = $scope.parseTime(item);
+      task_sec = timeProcessing.parseTime(item);
       // text of task without time in suffix
       var declensionedTime = (task_sec / 60 === 1) ? 'одну минуту '
         : $scope.util.plural(task_sec / 60, "%d минуту. ", "%d минуты. ", "%d минут. ");
@@ -285,7 +263,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'countdown', fu
 
       $scope.vm.play_index = $toIndex;
 
-      // $scope.removeTimer();
+      // countdown.removeTimer();
       countdown.add(countdown.mins, countdown.seconds, countdown.getParent($scope.vm.play_index));
 
       if ($scope.vm.play_index > $scope.vm.list.indexOf(textenter)) {
@@ -301,40 +279,26 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'countdown', fu
     $scope.$$phase || $scope.$apply();
   }
 
-  function getCurrentTime(el) {
-    var time = document.querySelector(el).innerText,
-      regex = /(\d{1,2})/g,
-      mins = parseInt(time.match(regex)[0]),
-      sec = parseInt(time.match(regex)[1]);
-
-    var delay = [mins, sec];
-    return delay;
-  }
-
-  function addMinute(currentTime) {
-    var result = parseInt(currentTime) + 1;
-    return result;
-  }
-
-  function subtractsMinute(currentTime) {
-    var result = Math.max(0, (parseInt(currentTime) - 1));
-    return result;
-  }
-
   function restart($index, mins, sec) {
     $scope.stopPlay();
     $scope.play($index, null, mins, sec)
   }
 
+  /**
+   * restart task after add or subtract 1 min
+   * @param event
+   * @param flag
+   * @param index
+   */
   $scope.changeTime = function (event, flag, index) {
     event.preventDefault();
     var mins, sec;
     if (flag) {
-      mins = parseInt(addMinute(getCurrentTime('#timer')[0]));
-      sec = parseInt(getCurrentTime('#timer')[1]);
+      mins = parseInt(timeProcessing.addMinute(timeProcessing.getCurrentTime('#timer')[0]));
+      sec = parseInt(timeProcessing.getCurrentTime('#timer')[1]);
     } else {
-      mins = parseInt(subtractsMinute(getCurrentTime('#timer')[0]));
-      sec = parseInt(getCurrentTime('#timer')[1]);
+      mins = parseInt(timeProcessing.subtractsMinute(timeProcessing.getCurrentTime('#timer')[0]));
+      sec = parseInt(timeProcessing.getCurrentTime('#timer')[1]);
     }
     restart(index, mins, sec);
     $scope.$$phase || $scope.$apply();

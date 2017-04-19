@@ -1,9 +1,9 @@
 (function () {
   "use strict";
 
-  app.factory('timeProcessing', function (parser) {
+  pointApp.factory('timeProcessing', function () {
 
-    var timeProcessing = function () {
+    var TimeProcessing = function () {
       var that = this;
       var timeReg = /\d{1,2}\s{0,1}(мин|м|min|mins|m)$/i;
 
@@ -71,6 +71,6 @@
 
     };
 
-    return taskPlayer;
+    return new TimeProcessing();
   });
 })();
