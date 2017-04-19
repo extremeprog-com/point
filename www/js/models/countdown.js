@@ -4,9 +4,9 @@
   pointApp.factory('countdown', function (vm) {
 
     var Countdown = function () {
-      var that = this;
-          that.mins = null;
-          that.sec  = null;
+      var that  = this;
+      that.mins = null;
+      that.sec  = null;
 
 
       /**
@@ -47,7 +47,6 @@
       };
 
       function tick() {
-        console.log(that.mins, that.sec);
         var counter         = document.getElementById('timer');
         var current_minutes = that.mins;
         that.sec -= 1;

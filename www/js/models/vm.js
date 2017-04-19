@@ -2,6 +2,7 @@
   "use strict";
 
   pointApp.factory('vm', function () {
+    console.log('vm factory');
     return {
       old_list    : angular.fromJson(localStorage.vmOldList) || null,
       focus_index : -1,

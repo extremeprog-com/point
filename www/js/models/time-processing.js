@@ -5,7 +5,7 @@
 
     var TimeProcessing = function () {
       var that = this;
-      var timeReg = /\d{1,2}\s{0,1}(мин|м|min|mins|m)$/i;
+      var timeReg = /\d{1,2}\s?(мин|м|min|mins|m)$/i;
 
 
       /**

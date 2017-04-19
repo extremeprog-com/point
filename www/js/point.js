@@ -1,17 +1,16 @@
 pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdown', 'timeProcessing', function ($scope, $interval, $timeout, vm, countdown, timeProcessing) {
   "use strict";
 
-  $scope.vm = vm;
-  var textenter = {textenter: 1};
-  $scope.textenter = textenter;
-  $scope.lastActions = angular.fromJson(localStorage.lastActions) || null;
+  $scope.vm            = vm;
+  var textenter        = {textenter: 1};
+  $scope.textenter     = textenter;
+  $scope.lastActions   = angular.fromJson(localStorage.lastActions) || null;
   $scope.rebase_period = 2 * 60 * 60 * 1000;
-  var timeReg = /\d{1,2}\s{0,1}(мин|м|min|mins|m)$/i;
 
-  var time_scale = 60,
-    task_sec = 2 * time_scale,
-    sec_before_end = time_scale / 2,
-    repeat_int = 2 * time_scale; // repeat next message interval in sec
+  var time_scale     = 60,
+      task_sec       = 2 * time_scale,
+      sec_before_end = time_scale / 2,
+      repeat_int     = 2 * time_scale; // repeat next message interval in sec
 
 
   // cordova plugins
@@ -40,11 +39,11 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
 
   // update $scope.vm.list
   if (!localStorage.vmList || localStorage.vmList === 'undefined') {
-    $scope.vm.list = [textenter];
+    $scope.vm.list      = [textenter];
     localStorage.vmList = angular.toJson($scope.vm.list);
   } else {
-    $scope.vm.list = angular.fromJson(localStorage.vmList);
-    textenter = $scope.vm.list.filter(function (x) {
+    $scope.vm.list   = angular.fromJson(localStorage.vmList);
+    textenter        = $scope.vm.list.filter(function (x) {
       return x.textenter == 1;
     })[0];
     $scope.textenter = textenter;
@@ -68,25 +67,25 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
     var now = Date.now();
     if ($scope.lastActions + $scope.rebase_period > now) {
       $scope.rebase_period = ($scope.lastActions + $scope.rebase_period) - now;
-      _to3 = $timeout(function () {
-        $scope.vm.old_list = $scope.vm.list.slice(0);
+      _to3                 = $timeout(function () {
+        $scope.vm.old_list  = $scope.vm.list.slice(0);
         localStorage.vmList = undefined;
 
         $timeout.cancel(_to3);
 
       }, $scope.rebase_period, true);
     }
-  }
+  };
 
   $scope.startRebasePeriod();
 
   // update lastActions datetime
   $scope.updateLastActDate = function () {
     $interval.cancel(_to3);
-    $scope.lastActions = Date.now();
+    $scope.lastActions       = Date.now();
     localStorage.lastActions = angular.toJson($scope.lastActions);
     $scope.startRebasePeriod();
-  }
+  };
 
   // catch user activity
   document.body.addEventListener('click', $scope.updateLastActDate, true);
@@ -95,27 +94,6 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
   $scope.$watch('msg', function () {
     $scope.updateLastActDate();
   }, true);
-
-  // controll play, pause, delete button
-  $scope.controlPlay = function ($index, item) {
-    if ($scope.vm.delete_index == $index) {
-
-      $scope.vm.list.splice($index, 1);
-      $scope.vm.delete_index = -1;
-
-    } else if ($scope.vm.play_index != $index) {
-
-      $scope.play($index, item);
-
-    } else if ($scope.vm.play_index == $index) {
-
-      $scope.stopPlay();
-
-    } else {
-      $scope.vm.play_index == $index && $scope.play(-1, item);
-    }
-  }
-
 
   $scope.util = Core.Class({
     /**
@@ -137,44 +115,9 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
     }
   });
 
-  // stop task
-  $scope.stopPlay = function () {
-    $scope.insomniaOff();
-    $timeout.cancel(_to1);
-    $timeout.cancel(_to2);
 
-    $scope.msg = null;
-    $scope.vm.play_index = -1;
+  // functions for playing and stopping task
 
-    countdown.removeTimer();
-  }
-
-  // play task
-  $scope.play = function ($index, item, mins, sec) {
-
-    if (typeof mins === "number" && typeof sec === "number") {
-      task_sec = (mins * 60) + sec; // seconds
-      initPlay($index, mins, sec);
-    } else {
-      initPlay($index, null, null);
-    }
-
-    var task = timeProcessing.trimTime($scope.vm.list[$scope.vm.play_index]);
-
-    setTask(task, $index, item, mins, sec);
-
-    setNoticeBeforeEndTimeout(task);
-
-    var left_time = task_sec / 60;
-    if (task_sec / 60 >= 3 && left_time > 2) {
-      setLeftTimeout(task, left_time);
-    }
-
-    setTaskTimeout();
-
-    $scope.$$phase || $scope.$apply();
-
-  };
 
   function initPlay($index, mins, sec) {
     if (mins && sec) task_sec = (mins * 60) + sec; // seconds
@@ -206,10 +149,10 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
     }, (task_sec - sec_before_end) * 1000, true);
   }
 
-  function setTask(task, $index, item, mins, sec) {
+  function setTask(task, item, mins, sec) {
     if (item) {
       // time from the task suffix
-      task_sec = timeProcessing.parseTime(item);
+      task_sec             = timeProcessing.parseTime(item);
       // text of task without time in suffix
       var declensionedTime = (task_sec / 60 === 1) ? 'одну минуту '
         : $scope.util.plural(task_sec / 60, "%d минуту. ", "%d минуты. ", "%d минут. ");
@@ -225,6 +168,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
   }
 
   function setLeftTimeout(task, left_time) {
+    // TODO: process case when time before and is not round number
     _to1 = $timeout(function () {
       left_time -= repeat_int;
       $scope.msg = task + 'Осталось' +
@@ -238,9 +182,107 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
     }, repeat_int * 1000, true);
   }
 
+
+  /**
+   * play task
+   * @param $index
+   * @param item
+   * @param mins
+   * @param sec
+   */
+  $scope.play = function ($index, item, mins, sec) {
+
+    if (typeof mins === "number" && typeof sec === "number") {
+      task_sec = (mins * 60) + sec; // seconds
+      initPlay($index, mins, sec);
+    } else {
+      initPlay($index, null, null);
+    }
+
+    var task = timeProcessing.trimTime($scope.vm.list[$scope.vm.play_index]);
+
+    setTask(task, item, mins, sec);
+
+    setNoticeBeforeEndTimeout(task);
+
+    var left_time = task_sec / 60;
+    if (task_sec / 60 >= 3 && left_time > 2) {
+      setLeftTimeout(task, left_time);
+    }
+
+    setTaskTimeout();
+
+    $scope.$$phase || $scope.$apply();
+
+  };
+
+
+  // stop task
+  $scope.stopPlay = function () {
+    $scope.insomniaOff();
+    $timeout.cancel(_to1);
+    $timeout.cancel(_to2);
+
+    $scope.msg           = null;
+    $scope.vm.play_index = -1;
+
+    countdown.removeTimer();
+  };
+
+  // controll play, pause, delete button
+  $scope.controlPlay = function ($index, item) {
+    if ($scope.vm.delete_index == $index) {
+
+      $scope.vm.list.splice($index, 1);
+      $scope.vm.delete_index = -1;
+
+    } else if ($scope.vm.play_index != $index) {
+
+      $scope.play($index, item);
+
+    } else if ($scope.vm.play_index == $index) {
+
+      $scope.stopPlay();
+
+    } else {
+      $scope.vm.play_index == $index && $scope.play(-1, item);
+    }
+  };
+
+
+  // function for adding and subtracting 1 minute
+  // from current task time
+
+
+  function restart($index, mins, sec) {
+    $scope.stopPlay();
+    $scope.play($index, null, mins, sec)
+  }
+
+  /**
+   * restart task after add or subtract 1 min
+   * @param event
+   * @param flag
+   * @param index
+   */
+  $scope.changeTime = function (event, flag, index) {
+    event.preventDefault();
+    var mins, sec;
+    if (flag) {
+      mins = parseInt(timeProcessing.addMinute(timeProcessing.getCurrentTime('#timer')[0]));
+      sec  = parseInt(timeProcessing.getCurrentTime('#timer')[1]);
+    } else {
+      mins = parseInt(timeProcessing.subtractsMinute(timeProcessing.getCurrentTime('#timer')[0]));
+      sec  = parseInt(timeProcessing.getCurrentTime('#timer')[1]);
+    }
+    restart(index, mins, sec);
+    $scope.$$phase || $scope.$apply();
+  };
+
+
   $scope.onTextareFocus = function ($index) {
     $scope.this_task = $scope.vm.list[$index];
-  }
+  };
 
   $scope.onTextareaBlur = function ($index, item) {
     $scope.vm.focus_index = -1;
@@ -249,7 +291,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
       $scope.vm.play_index === $index) {
       $scope.play($index, item, null, null);
     }
-  }
+  };
 
   $scope.onReorder = function (item, $fromIndex, $toIndex) {
 
@@ -276,29 +318,5 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
     $scope.$$phase || $scope.$apply();
   }
 
-  function restart($index, mins, sec) {
-    $scope.stopPlay();
-    $scope.play($index, null, mins, sec)
-  }
-
-  /**
-   * restart task after add or subtract 1 min
-   * @param event
-   * @param flag
-   * @param index
-   */
-  $scope.changeTime = function (event, flag, index) {
-    event.preventDefault();
-    var mins, sec;
-    if (flag) {
-      mins = parseInt(timeProcessing.addMinute(timeProcessing.getCurrentTime('#timer')[0]));
-      sec = parseInt(timeProcessing.getCurrentTime('#timer')[1]);
-    } else {
-      mins = parseInt(timeProcessing.subtractsMinute(timeProcessing.getCurrentTime('#timer')[0]));
-      sec = parseInt(timeProcessing.getCurrentTime('#timer')[1]);
-    }
-    restart(index, mins, sec);
-    $scope.$$phase || $scope.$apply();
-  };
 
 }]);
