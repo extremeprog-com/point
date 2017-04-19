@@ -1,19 +1,31 @@
 (function () {
   "use strict";
 
-  app.factory('countdownTimer', function (parser) {
+  pointApp.factory('countdown', function () {
 
-    var countdownTimer = function () {
-      var that = this;
+    var Countdown = function () {
+      var that = this,
+          mins = null,
+          sec  = null;
 
-      that.countdown = {};
-      that.countdown.mins = null;
-      that.countdown.seconds = null;
 
-      // countdown timer
-      that.countdown = function (minutes, parent, seconds) {
+      /**
+       * get parent elem for append a countdown timer
+       * @param {number} index - index of task
+       */
+      that.getParent = function (index) {
+        return document.getElementsByClassName('list')[0].children[index].children[0];
+      };
+
+      /**
+       * add countdown timer to parent element
+       * @param {number} minutes - minutes to end of task
+       * @param {number} seconds - seconds to end of task
+       * @param {object} parent - parent DOM element to append timer
+       */
+      that.add = function (minutes, seconds, parent) {
         if (seconds === 0) {
-          return that.countdown(minutes - 1, parent, 60);
+          return that.add(minutes - 1, 60, parent);
         }
         if (minutes < 0) {
           return;
@@ -21,36 +33,44 @@
         if (document.getElementById('timer') && that.vm.play_index !== -1) {
           that.removeTimer();
         }
-        that.countdown.mins = minutes;
-        that.countdown.seconds = seconds || 60;
+
+        mins = minutes;
+        sec  = seconds || 60;
+
         var timerEl = document.createElement('div');
         timerEl.setAttribute('id', 'timer');
+        console.log(parent);
+        console.log(timerEl);
         parent.appendChild(timerEl);
 
-        function tick() {
-          var counter = document.getElementById('timer');
-          var current_minutes = that.countdown.mins;
-          that.countdown.seconds--;
-          counter.innerText = current_minutes.toString() + ':' +
-            (that.countdown.seconds < 10 ? '0' : '') +
-            String(that.countdown.seconds);
-          if (that.countdown.seconds > 0) {
-            that.timer = setTimeout(tick, 1000);
-          } else {
+        tick();
+      };
 
-            if (that.countdown.mins >= 1) {
+      function tick() {
+        var counter         = document.getElementById('timer');
+        var current_minutes = mins;
+        sec -= 1;
+        counter.innerText   = current_minutes.toString() + ':' +
+          (sec < 10 ? '0' : '') +
+          String(sec);
+        if (sec > 0) {
+          that.timer = setTimeout(tick, 1000);
+        } else {
 
-              that.countdown(that.countdown.mins - 1, parent, 60);
+          if (mins >= 1) {
 
-            }
+            that.add(mins - 1, 60, parent);
 
           }
         }
-
-        tick();
       }
-    };
 
-    return countdownTimer;
+      that.removeTimer = function () {
+        document.getElementById('timer').remove();
+        clearTimeout(that.timer);
+      }
+
+    };
+    return new Countdown();
   });
 })();

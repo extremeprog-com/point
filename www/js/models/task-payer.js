@@ -6,7 +6,7 @@
 (function () {
   "use strict";
 
-  app.factory('taskPlayer', function (parser) {
+  app.factory('taskPlayer', function () {
 
     var taskPlayer = function () {
       var that = this;

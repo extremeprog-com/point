@@ -1,5 +1,7 @@
-pointApp.controller('point', function ($scope, $interval, $timeout) {
+pointApp.controller('point', ['$scope', '$interval', '$timeout', 'countdown', function ($scope, $interval, $timeout, countdown) {
   "use strict";
+
+  window.cd = countdown;
 
   $scope.vm = {};
   var textenter = {textenter: 1};
@@ -11,10 +13,6 @@ pointApp.controller('point', function ($scope, $interval, $timeout) {
   $scope.lastActions = angular.fromJson(localStorage.lastActions) || null;
   $scope.rebase_period = 2 * 60 * 60 * 1000;
   var timeReg = /\d{1,2}\s{0,1}(мин|м|min|mins|m)$/i;
-
-  // $scope.countdown = {};
-  // $scope.countdown.mins = null;
-  // $scope.countdown.seconds = null;
 
   var time_scale = 60,
     task_sec = 2 * time_scale,
@@ -144,56 +142,6 @@ pointApp.controller('point', function ($scope, $interval, $timeout) {
     return str.replace(timeReg, '');
   }
 
-  // get parent elem for insert a countdown timer
-  $scope.getParent = function (index) {
-    return document.getElementsByClassName('list')[0].children[index].children[0];
-  }
-
-  $scope.removeTimer = function () {
-    document.getElementById('timer').remove();
-    clearTimeout($scope.timer);
-  }
-
-  // countdown timer
-  // $scope.countdown = function (minutes, parent, seconds) {
-  //   if (seconds === 0) {
-  //     return $scope.countdown(minutes - 1, parent, 60);
-  //   }
-  //   if (minutes < 0) {
-  //     return;
-  //   }
-  //   if (document.getElementById('timer') && $scope.vm.play_index !== -1) {
-  //     $scope.removeTimer();
-  //   }
-  //   $scope.countdown.mins = minutes;
-  //   $scope.countdown.seconds = seconds || 60;
-  //   var timerEl = document.createElement('div');
-  //   timerEl.setAttribute('id', 'timer');
-  //   parent.appendChild(timerEl);
-  //
-  //   function tick() {
-  //     var counter = document.getElementById('timer');
-  //     var current_minutes = $scope.countdown.mins;
-  //     $scope.countdown.seconds--;
-  //     counter.innerText = current_minutes.toString() + ':' +
-  //       ($scope.countdown.seconds < 10 ? '0' : '') +
-  //       String($scope.countdown.seconds);
-  //     if ($scope.countdown.seconds > 0) {
-  //       $scope.timer = setTimeout(tick, 1000);
-  //     } else {
-  //
-  //       if ($scope.countdown.mins >= 1) {
-  //
-  //         $scope.countdown($scope.countdown.mins - 1, parent, 60);
-  //
-  //       }
-  //
-  //     }
-  //   }
-  //
-  //   tick();
-  // }
-
   $scope.util = Core.Class({
     /**
      * Returns plural suffix of unit
@@ -223,7 +171,7 @@ pointApp.controller('point', function ($scope, $interval, $timeout) {
     $scope.msg = null;
     $scope.vm.play_index = -1;
 
-    $scope.removeTimer();
+    countdown.removeTimer();
   }
 
   // play task
@@ -266,7 +214,7 @@ pointApp.controller('point', function ($scope, $interval, $timeout) {
     }
 
     if (document.getElementById('timer') && $scope.vm.play_index !== -1) {
-      $scope.removeTimer();
+      countdown.removeTimer();
     }
   }
 
@@ -292,12 +240,12 @@ pointApp.controller('point', function ($scope, $interval, $timeout) {
         : $scope.util.plural(task_sec / 60, "%d минуту. ", "%d минуты. ", "%d минут. ");
 
       // set countdown timer
-      $scope.countdown(task_sec / 60, $scope.getParent($scope.vm.play_index), 0);
+      countdown.add(task_sec / 60, 0, countdown.getParent($scope.vm.play_index));
 
       $scope.msg = 'Задача на ' + declensionedTime + task;
     } else {
       // set countdown timer
-      $scope.countdown(mins, $scope.getParent($scope.vm.play_index), sec);
+      countdown.add(mins, sec, countdown.getParent($scope.vm.play_index));
     }
   }
 
@@ -338,7 +286,7 @@ pointApp.controller('point', function ($scope, $interval, $timeout) {
       $scope.vm.play_index = $toIndex;
 
       // $scope.removeTimer();
-      $scope.countdown($scope.countdown.mins, $scope.getParent($scope.vm.play_index), $scope.countdown.seconds);
+      countdown.add(countdown.mins, countdown.seconds, countdown.getParent($scope.vm.play_index));
 
       if ($scope.vm.play_index > $scope.vm.list.indexOf(textenter)) {
         var idx = $fromIndex >= $scope.vm.list.indexOf(textenter) ? 0 : $fromIndex;
@@ -392,4 +340,4 @@ pointApp.controller('point', function ($scope, $interval, $timeout) {
     $scope.$$phase || $scope.$apply();
   };
 
-});
+}]);
