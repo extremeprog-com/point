@@ -21,8 +21,12 @@
           var timeNum = parseInt(time, 10);
           return timeNum * 60;
         } else {
-          return 2 * 60;
+          return null;
         }
+      };
+
+      that.timeToMinsAndSecs = function(seconds){
+        return [ Math.floor(seconds / 60), seconds % 60 ];
       };
 
 

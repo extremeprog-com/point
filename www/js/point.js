@@ -1,5 +1,6 @@
 pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdown', 'timeProcessing', function ($scope, $interval, $timeout, vm, countdown, timeProcessing) {
   "use strict";
+  window.scope = $scope;
 
   $scope.vm            = vm;
   var textenter        = {textenter: 1};
@@ -8,7 +9,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
   $scope.rebase_period = 2 * 60 * 60 * 1000;
 
   var time_scale     = 60,
-      task_sec       = 2 * time_scale,
+      default_time   = 2 * time_scale,
       sec_before_end = time_scale / 2,
       repeat_int     = 2 * time_scale; // repeat next message interval in sec
 
@@ -36,6 +37,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
   var _to1 = null;
   var _to2 = null;
   var _to3 = null;
+  var _to4 = null;
 
   // update $scope.vm.list
   if (!localStorage.vmList || localStorage.vmList === 'undefined') {
@@ -118,12 +120,12 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
 
   // functions for playing and stopping task
 
-
-  function initPlay($index, mins, sec) {
-    if (mins && sec) task_sec = (mins * 60) + sec; // seconds
-    $scope.insomniaOn();
-    $timeout.cancel(_to1);
-    $timeout.cancel(_to2);
+  /**
+   * inits speaker
+   * @param $index
+   */
+  function initPlay($index) {
+    dropTimers();
 
     $scope.vm.play_index = $scope.vm.list.indexOf(textenter) > $index ? $index : -1;
 
@@ -136,101 +138,130 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
     }
   }
 
-  function setTaskTimeout() {
+  /**
+   * get delay before end of task
+   */
+  function getTaskTime(mins, sec) {
+    // TODO: do something
+
+    return delay;
+  }
+
+  function setTaskTimeout(taskTime) {
     _to2 = $timeout(function () {
-      var idx = $scope.vm.list.indexOf(textenter) <= ++$scope.vm.play_index ? 0 : $scope.vm.play_index;
-      $scope.play(idx, $scope.vm.list[idx], null, null);
-    }, task_sec * 1000, true);
+      var idx      = $scope.vm.list.indexOf(textenter) <= ++$scope.vm.play_index ? 0 : $scope.vm.play_index;
+      var item     = $scope.vm.list[idx];
+      var taskTime = timeProcessing.parseTime(item) || default_time;
+      $scope.play(idx, item, taskTime);
+    }, taskTime * 1000, true);
   }
 
-  function setNoticeBeforeEndTimeout(task) {
-    _to1 = $timeout(function () {
-      $scope.msg = sec_before_end + ' секунд до конца задачи. ' + task;
-    }, (task_sec - sec_before_end) * 1000, true);
-  }
-
-  function setTask(task, item, mins, sec) {
-    if (item) {
-      // time from the task suffix
-      task_sec             = timeProcessing.parseTime(item);
-      // text of task without time in suffix
-      var declensionedTime = (task_sec / 60 === 1) ? 'одну минуту '
-        : $scope.util.plural(task_sec / 60, "%d минуту. ", "%d минуты. ", "%d минут. ");
-
-      // set countdown timer
-      countdown.add(task_sec / 60, 0, countdown.getParent($scope.vm.play_index));
-
-      $scope.msg = 'Задача на ' + declensionedTime + task;
-    } else {
-      // set countdown timer
-      countdown.add(mins, sec, countdown.getParent($scope.vm.play_index));
+  function setNoticeBeforeEndTimeout(task, taskTime) {
+    if (taskTime > sec_before_end) {
+      _to1 = $timeout(function () {
+        $scope.msg = sec_before_end + ' секунд до конца задачи ' + task;
+      }, (taskTime - sec_before_end) * 1000, true);
     }
   }
 
-  function setLeftTimeout(task, left_time) {
-    // TODO: process case when time before and is not round number
-    _to1 = $timeout(function () {
-      left_time -= repeat_int;
-      $scope.msg = task + 'Осталось' +
-        $scope.util.plural(left_time, "%d минута. ", "%d минуты. ", "%d минут. ") +
-        ' до конца задачи. ';
+  function setTask(task, item, taskTime /* In seconds! */) {
+    var time = timeProcessing.timeToMinsAndSecs(taskTime)
+    var mins = time[0];
+    var secs = time[1];
 
-      $timeout.cancel(_to1);
-      if ($scope.vm.play_index === $index && left_time > 2) {
-        setLeftTimeout();
+    countdown.add(mins, secs, countdown.getParent($scope.vm.play_index));
+
+    if (item) {
+      // text of task without time in suffix
+      var declensionedTime = (mins === 1) ? 'одну минуту '
+        : $scope.util.plural(mins, "%d минуту ", "%d минуты ", "%d минут ");
+      $scope.msg           = 'Задача на ' + declensionedTime + task;
+    }
+
+  }
+
+  /**
+   *
+   * @param task - text to say
+   * @param left_time - in seconds
+   */
+  function setLeftTimeout(task, leftTime, $index) {
+
+    if (leftTime > repeat_int) {
+      var numOfIntervals = Math.floor(leftTime / repeat_int);
+
+      var leftRepeatTime = numOfIntervals * repeat_int;
+      var timeToNext     = leftTime - leftRepeatTime;
+
+      if (timeToNext == 0) { // do not say anything immediately after launch
+        timeToNext = repeat_int;
+        leftRepeatTime -= repeat_int;
       }
-    }, repeat_int * 1000, true);
+
+      console.log("wait: ", timeToNext);
+
+      _to4 = $timeout(function () {
+        var minsLeft = timeProcessing.timeToMinsAndSecs(leftRepeatTime)[0];
+        $scope.msg   = task + 'Осталось' +
+          $scope.util.plural(minsLeft, "%d минута ", "%d минуты ", "%d минут ") +
+          ' до конца задачи ';
+
+        $timeout.cancel(_to4);
+        if ($scope.vm.play_index === $index) { // if same task still in progress
+          setLeftTimeout(task, leftRepeatTime, $index);
+        }
+      }, timeToNext * 1000, true)
+    }
   }
 
 
   /**
    * play task
    * @param $index
-   * @param item
-   * @param mins
-   * @param sec
+   * @param taskText
+   * @param taskTime in seconds
    */
-  $scope.play = function ($index, item, mins, sec) {
+  $scope.play = function ($index, taskText, taskTime) {
 
-    if (typeof mins === "number" && typeof sec === "number") {
-      task_sec = (mins * 60) + sec; // seconds
-      initPlay($index, mins, sec);
-    } else {
-      initPlay($index, null, null);
-    }
+    initPlay($index);
 
     var task = timeProcessing.trimTime($scope.vm.list[$scope.vm.play_index]);
 
-    setTask(task, item, mins, sec);
+    setTask(task, taskText, taskTime);
 
-    setNoticeBeforeEndTimeout(task);
+    setNoticeBeforeEndTimeout(task, taskTime);
 
-    var left_time = task_sec / 60;
-    if (task_sec / 60 >= 3 && left_time > 2) {
-      setLeftTimeout(task, left_time);
-    }
+    setLeftTimeout(task, taskTime, $index);
 
-    setTaskTimeout();
+    setTaskTimeout(taskTime);
 
     $scope.$$phase || $scope.$apply();
 
   };
 
-
-  // stop task
-  $scope.stopPlay = function () {
+  function dropTimers() {
     $scope.insomniaOff();
     $timeout.cancel(_to1);
     $timeout.cancel(_to2);
+    $timeout.cancel(_to4);
+  }
 
+  // stop task
+  $scope.stopPlay = function () {
+    dropTimers();
     $scope.msg           = null;
     $scope.vm.play_index = -1;
 
     countdown.removeTimer();
   };
 
-  // controll play, pause, delete button
+  /**
+   * control play, pause, delete button
+   * @param $index - index of task
+   * @param item - one task in vm.list
+   */
   $scope.controlPlay = function ($index, item) {
+    var taskTime = timeProcessing.parseTime(item) || default_time;
     if ($scope.vm.delete_index == $index) {
 
       $scope.vm.list.splice($index, 1);
@@ -238,14 +269,14 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
 
     } else if ($scope.vm.play_index != $index) {
 
-      $scope.play($index, item);
+      $scope.play($index, item, taskTime);
 
     } else if ($scope.vm.play_index == $index) {
 
       $scope.stopPlay();
 
     } else {
-      $scope.vm.play_index == $index && $scope.play(-1, item);
+      $scope.vm.play_index == $index && $scope.play(-1, item, taskTime);
     }
   };
 
@@ -256,7 +287,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
 
   function restart($index, mins, sec) {
     $scope.stopPlay();
-    $scope.play($index, null, mins, sec)
+    $scope.play($index, null, mins * 60 + sec)
   }
 
   /**
@@ -289,33 +320,59 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
     if ($scope.this_task !== $scope.vm.list[$index] &&
       $scope.vm.play_index !== -1 &&
       $scope.vm.play_index === $index) {
-      $scope.play($index, item, null, null);
+      var taskTime = timeProcessing.parseTime(item) || default_time;
+      $scope.play($index, item, taskTime);
     }
   };
+
 
   $scope.onReorder = function (item, $fromIndex, $toIndex) {
 
     $scope.vm.list.splice($fromIndex, 1);
     $scope.vm.list.splice($toIndex, 0, item);
 
+    // when task in progress
     if ($fromIndex == $scope.vm.play_index) {
 
-      $scope.vm.play_index = $toIndex;
+      // when drag task to differed
+      if (isDiffered($toIndex, $fromIndex)) {
+        console.log("differed");
+        $scope.vm.play_index = $fromIndex;
+        var taskText         = $scope.vm.list[$fromIndex];
+        $scope.stopPlay();
+        var taskTime         = timeProcessing.parseTime(taskText) || default_time;
+        $scope.play($fromIndex, taskText, taskTime);
+      } else {
 
-      // countdown.removeTimer();
-      countdown.add(countdown.mins, countdown.seconds, countdown.getParent($scope.vm.play_index));
+        $scope.vm.play_index = $toIndex;
+        restartPlayOnDrag($scope.vm.play_index);
 
-      if ($scope.vm.play_index > $scope.vm.list.indexOf(textenter)) {
-        var idx = $fromIndex >= $scope.vm.list.indexOf(textenter) ? 0 : $fromIndex;
-        $scope.play(idx, $scope.vm.list[idx], null, null);
       }
+
+      // when drag task up
     } else if ($scope.vm.play_index < $fromIndex && $scope.vm.play_index >= $toIndex) {
-      $scope.vm.play_index++;
-    } else if ($scope.vm.play_index > $fromIndex && $scope.vm.play_index < $toIndex) {
-      $scope.vm.play_index--;
+      $scope.vm.play_index += 1;
+      restartPlayOnDrag($scope.vm.play_index);
+      // when drag task down
+    } else if ($scope.vm.play_index > $fromIndex && $scope.vm.play_index <= $toIndex) {
+      $scope.vm.play_index -= 1;
+      restartPlayOnDrag($scope.vm.play_index);
     }
 
     $scope.$$phase || $scope.$apply();
+  };
+
+  function restartPlayOnDrag(idx) {
+    var mins     = timeProcessing.getCurrentTime('#timer')[0];
+    var sec      = timeProcessing.getCurrentTime('#timer')[1];
+    var taskTime = mins * 60 + sec;
+    var taskText = $scope.vm.list[idx];
+    $scope.play(idx, taskText, taskTime);
+  }
+
+  function isDiffered(toIndex, fromIndex) {
+    var textenterIdx = $scope.vm.list.indexOf(textenter);
+    return (toIndex > textenterIdx && (fromIndex < textenterIdx));
   }
 
 

@@ -43,10 +43,10 @@
         console.log(timerEl);
         parent.appendChild(timerEl);
 
-        tick();
+        tick(parent);
       };
 
-      function tick() {
+      function tick(parent) {
         var counter         = document.getElementById('timer');
         var current_minutes = that.mins;
         that.sec -= 1;
@@ -54,7 +54,7 @@
           (that.sec < 10 ? '0' : '') +
           String(that.sec);
         if (that.sec > 0) {
-          that.timer = setTimeout(tick, 1000);
+          that.timer = setTimeout(function(){ tick(parent) }, 1000);
         } else {
 
           if (that.mins >= 1) {
@@ -66,8 +66,11 @@
       }
 
       that.removeTimer = function () {
-        document.getElementById('timer').remove();
-        clearTimeout(that.timer);
+        var timer = document.getElementById('timer');
+        if(timer) {
+          timer.remove();
+          clearTimeout(that.timer);
+        }
       }
 
     };
