@@ -138,15 +138,6 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
     }
   }
 
-  /**
-   * get delay before end of task
-   */
-  function getTaskTime(mins, sec) {
-    // TODO: do something
-
-    return delay;
-  }
-
   function setTaskTimeout(taskTime) {
     _to2 = $timeout(function () {
       var idx      = $scope.vm.list.indexOf(textenter) <= ++$scope.vm.play_index ? 0 : $scope.vm.play_index;
