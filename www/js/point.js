@@ -53,6 +53,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
 
   // write tasks to localStorage
   $scope.$watchCollection('vm.list', function () {
+    $scope.msg=''; // to not repeat current task voicing
     localStorage.vmList = angular.toJson($scope.vm.list);
   }, true);
 
@@ -341,17 +342,19 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
 
         $scope.vm.play_index = $toIndex;
         restartPlayOnDrag($scope.vm.play_index);
-
+        $scope.msg='';
       }
 
       // when drag task up
     } else if ($scope.vm.play_index < $fromIndex && $scope.vm.play_index >= $toIndex) {
       $scope.vm.play_index += 1;
       restartPlayOnDrag($scope.vm.play_index);
+      $scope.msg = ''; // to not repeat current task voicing
       // when drag task down
     } else if ($scope.vm.play_index > $fromIndex && $scope.vm.play_index <= $toIndex) {
       $scope.vm.play_index -= 1;
       restartPlayOnDrag($scope.vm.play_index);
+      $scope.msg = ''; // to not repeat current task voicing
     }
 
     $scope.$$phase || $scope.$apply();
