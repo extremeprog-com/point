@@ -160,7 +160,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
     var mins = time[0];
     var secs = time[1];
 
-    countdown.add(mins, secs, countdown.getParent($scope.vm.play_index));
+    countdown.startTimer(mins, secs, countdown.getParent($scope.vm.play_index));
 
     if (item) {
       // text of task without time in suffix

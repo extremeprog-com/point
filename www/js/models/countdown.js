@@ -1,12 +1,13 @@
 (function () {
   "use strict";
 
-  pointApp.factory('countdown', function (vm) {
+  pointApp.factory('countdown', function (vm, timeProcessing) {
 
     var Countdown = function () {
       var that  = this;
       that.mins = null;
       that.sec  = null;
+      that.start_ms = 0;
 
 
       /**
@@ -16,6 +17,11 @@
       that.getParent = function (index) {
         return document.getElementsByClassName('list')[0].children[index].children[0];
       };
+
+      that.startTimer = function (minutes, seconds, parent) {
+        that.start_ms = Date.now() % 1000;
+        return that.add(minutes, seconds, parent);
+      }
 
       /**
        * add countdown timer to parent element
@@ -53,8 +59,10 @@
         counter.innerText   = current_minutes.toString() + ':' +
           (that.sec < 10 ? '0' : '') +
           String(that.sec);
-        if (that.sec > 0) {
-          that.timer = setTimeout(function(){ tick(parent) }, 1000);
+        if (that.sec >= 0) {
+          var curr_ms = Date.now() % 1000;
+          var wait = curr_ms >= that.start_ms ? ( 1000 - curr_ms + that.start_ms ) : (that.start_ms - curr_ms);
+          that.timer = setTimeout(function(){ tick(parent) }, wait);
         } else {
 
           if (that.mins >= 1) {
