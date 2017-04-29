@@ -176,7 +176,9 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
    * @param task - text to say
    * @param left_time - in seconds
    */
-  function setLeftTimeout(task, leftTime, $index) {
+  function setLeftTimeout(task, endTime, $index) {
+
+    var leftTime = endTime - Math.floor(Date.now() / 1000);
 
     if (leftTime > repeat_int) {
       var numOfIntervals = Math.floor(leftTime / repeat_int);
@@ -199,7 +201,7 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
 
         $timeout.cancel(_to4);
         if ($scope.vm.play_index === $index) { // if same task still in progress
-          setLeftTimeout(task, leftRepeatTime, $index);
+          setLeftTimeout(task, endTime, $index);
         }
       }, timeToNext * 1000, true)
     }
@@ -222,7 +224,9 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
 
     setNoticeBeforeEndTimeout(task, taskTime);
 
-    setLeftTimeout(task, taskTime, $index);
+    var endTime = Math.floor(Date.now() / 1000) + taskTime;
+
+    setLeftTimeout(task, endTime, $index);
 
     setTaskTimeout(taskTime);
 
