@@ -332,7 +332,6 @@ pointApp.controller('point', ['$scope', '$interval', '$timeout', 'vm', 'countdow
 
       // when drag task to differed
       if (isDiffered($toIndex, $fromIndex)) {
-        console.log("differed");
         $scope.vm.play_index = $fromIndex;
         var taskText         = $scope.vm.list[$fromIndex];
         $scope.stopPlay();

@@ -45,8 +45,6 @@
 
         var timerEl = document.createElement('div');
         timerEl.setAttribute('id', 'timer');
-        console.log(parent);
-        console.log(timerEl);
         parent.appendChild(timerEl);
 
         tick(parent);
