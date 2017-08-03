@@ -2,11 +2,13 @@ FROM ubuntu:14.04
 
 # uncomment 2 lines for latest node.js
 RUN apt-get update; apt-get install -y apt-transport-https; echo deb https://deb.nodesource.com/node_4.x trusty main >> /etc/apt/sources.list
-RUN apt-get update; apt-get install -y --force-yes nodejs git ssh-client python make g++ libkrb5-dev
+RUN apt-get update; apt-get install -y --force-yes nodejs git ssh-client python make g++ libkrb5-dev wget
 
 RUN mkdir -p /root/app
 
-RUN npm install -g bower gulp ionic cordova
+RUN npm cache clean -f; npm install -g n; n stable
+
+RUN npm install -g bower gulp ionic@2.2.1 cordova@6.0.0
 
 COPY ./root/app/package.json /root/app
 RUN cd /root/app; npm update;
