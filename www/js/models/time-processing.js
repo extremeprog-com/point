@@ -5,7 +5,7 @@
 
     var TimeProcessing = function () {
       var that = this;
-      var timeReg = /\d{1,2}\s?(мин|м|min|mins|m)$/i;
+      var timeReg = /\d{1,}\s?(мин|м|min|mins|m)$/i;
 
 
       /**
@@ -46,7 +46,7 @@
        */
       that.getCurrentTime = function (el) {
         var time = document.querySelector(el).innerText,
-          regex = /(\d{1,2})/g,
+          regex = /(\d{1,})/g,
           mins = parseInt(time.match(regex)[0]),
           sec = parseInt(time.match(regex)[1]);
 
