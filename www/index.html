@@ -32,6 +32,9 @@
 
     <script src="js/app.js"></script>
     <script src="js/point.js"></script>
+    <script src="js/models/vm.js"></script>
+    <script src="js/models/countdown.js"></script>
+    <script src="js/models/time-processing.js"></script>
   </head>
   <script>Core.processNamespace(classes);Core.processNamespace(libs);Core.processGlobal();</script>
   <body ng-app="pointApp">
@@ -56,7 +59,7 @@
             >
 
               <div
-                      class="{{ 'point-task' + 
+                      class="{{ 'point-task' +
                       ($index < vm.list.indexOf(textenter) ? '' : ' deferred-style') }}"
                       ng-class="{ item_focused: vm.focus_index == $index }"
                       ng-if="item != textenter"
@@ -87,6 +90,14 @@
                     ng-click="controlPlay($index, item)"
                     onmousedown="console.log(this.className); this.className.match('playing') && setTimeout(function() { document.getElementById('textarea-' + this.id.match(/\d+/)[0]).focus() }.bind(this), 50)"
               ></ion-reorder-button>
+              <div class="minus"
+                   ng-show="vm.play_index == $index && $index < vm.list.indexOf(textenter)"
+                   ng-if="item != textenter"
+                   ng-click="changeTime($event, false, $index)">-</div>
+              <div class="plus"
+                   ng-show="vm.play_index == $index && $index < vm.list.indexOf(textenter)"
+                   ng-if="item != textenter"
+                   ng-click="changeTime($event, true, $index)">+</div>
               <voice text="msg"></voice>
               <div ng-if="item == textenter">
                 <div class="textenter">

@@ -41,4 +41,4 @@ pointApp.directive('voice', function() {
       });
     }
   }
-}); 
+});
